@@ -26,5 +26,41 @@ class UsersController extends Controller
         return redirect("/");
     }
 
+
+    public function login(Request $request) {
+    return view('users.login');
+    }
+
+    public function doLogin(Request $request) {
+
+        $user = User::where('email', $request->email)->first();
+
+        if(!$user)
+            return redirect()->back()->withInput($request->input())->withErrors('No email found.');
+
+
+        if(!Auth::attempt(['email' => $request->email, 'password' => $request->password]))
+            return redirect()->back()->withInput($request->input())->withErrors('Invalid login information.');
+        Auth::setUser($user);
+    
+        return redirect('/profile');
+    }
+
+    public function doLogout(Request $request) {
+
+        Auth::logout();
+
+    return redirect('/');
+    }
+
+    public function profile(Request $request) {
+        $user = Auth::user();
+        
+        if (!$user) {
+            return redirect('/login');
+        }
+        
+        return view('users.profile', ['user' => $user]);
+    }
 }
 
