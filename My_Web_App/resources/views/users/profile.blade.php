@@ -18,6 +18,7 @@
     
     <div><b>Name:</b> {{ $user->name }}</div>
     <div><b>Email:</b> {{ $user->email }}</div>
+    <div><b>Role:</b> {{ $user->getRoleNames()->first() }}</div>
     <div><b>Joined:</b> {{ $user->created_at->format('Y-m-d') }}</div>
     
     <a href="{{ route('do_logout') }}" class="logout">Logout</a>

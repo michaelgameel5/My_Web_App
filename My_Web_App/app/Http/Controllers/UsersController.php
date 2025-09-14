@@ -32,18 +32,15 @@ class UsersController extends Controller
     }
 
     public function doLogin(Request $request) {
+        $credentials = $request->only('email', 'password');
 
-        $user = User::where('email', $request->email)->first();
+        if (Auth::attempt($credentials)) {
+            // Authentication passed
+            return redirect()->route('welcome');
+        }
 
-        if(!$user)
-            return redirect()->back()->withInput($request->input())->withErrors('No email found.');
-
-
-        if(!Auth::attempt(['email' => $request->email, 'password' => $request->password]))
-            return redirect()->back()->withInput($request->input())->withErrors('Invalid login information.');
-        Auth::setUser($user);
-    
-        return redirect('/profile');
+        // Authentication failed
+        return redirect()->back()->withInput($request->input())->withErrors('Invalid login information.');
     }
 
     public function doLogout(Request $request) {
@@ -53,8 +50,13 @@ class UsersController extends Controller
     return redirect('/');
     }
 
-    public function profile(Request $request) {
-        $user = Auth::user();
+    public function profile(Request $request, $id = null) {
+        // If ID is provided, find that user, otherwise use authenticated user
+        if ($id) {
+            $user = User::find($id);
+        } else {
+            $user = Auth::user();
+        }
         
         if (!$user) {
             return redirect('/login');
@@ -62,5 +64,16 @@ class UsersController extends Controller
         
         return view('users.profile', ['user' => $user]);
     }
-}
+    
+    public function welcome() {
+        $user = Auth::user();
+        
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        
 
+        return view('welcome', ['user' => $user]);
+    
+    }
+}
